@@ -41,7 +41,7 @@ jobs:
         id: set-release-tag
         run: |
           SHORT_SHA=${GITHUB_SHA::7}
-          echo "RELEASE_IMAGE_TAG="${IMAGE_NAME}:${POSTGRES_VERSION}-${BUILD_NUMBER}-${SHORT_SHA}" >> $GITHUB_ENV
+          echo "RELEASE_IMAGE_TAG=${IMAGE_NAME}:${POSTGRES_VERSION}-${BUILD_NUMBER}-${SHORT_SHA}" >> $GITHUB_ENV
         env:
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
           POSTGRES_VERSION: ${{ matrix.postgres_version }}
