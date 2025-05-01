@@ -22,6 +22,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  packages: write
 jobs:
   # TODO maybe generate matrix based on input on workflow_dispatch
   test:
