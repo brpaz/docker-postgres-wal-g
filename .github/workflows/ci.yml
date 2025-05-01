@@ -32,10 +32,20 @@ jobs:
         wal_g_version: ["v3.0.7"]
       fail-fast: true
     env:
-      TEST_IMAGE_TAG: "ghcr.io/brpaz/postgres-wal-g:${{ matrix.postgres_version }}-${{ github.sha }}"
+      IMAGE_NAME: "ghcr.io/brpaz/docker-postgres-wal-g:postgres-wal-g"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set release tag
+        id: set-release-tag
+        run: |
+          SHORT_SHA=${GITHUB_SHA::7}
+          echo "RELEASE_IMAGE_TAG="${IMAGE_NAME}:${POSTGRES_VERSION}-${BUILD_NUMBER}-${SHORT_SHA}" >> $GITHUB_ENV
+        env:
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          POSTGRES_VERSION: ${{ matrix.postgres_version }}
+          BUILD_NUMBER: ${{ github.run_number }}
 
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
@@ -47,13 +57,13 @@ jobs:
         with:
           postgres_version: ${{ matrix.postgres_version }}
           wal_g_version: ${{ matrix.wal_g_version }}
-          image_tag: ${{ env.TEST_IMAGE_TAG }}
+          image_tag: ${{ env.RELEASE_IMAGE_TAG }}
 
       - name: Push Docker image
         uses: docker/build-push-action@v5
         if: github.event_name != 'pull_request'
         with:
           context: .
-          tags: ${{ env.TEST_IMAGE_TAG }}
+          tags: ${{ env.RELEASE_IMAGE_TAG }}
           push: true
           load: false
