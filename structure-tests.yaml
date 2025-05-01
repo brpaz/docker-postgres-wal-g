@@ -1,6 +1,17 @@
 schemaVersion: 2.0.0
 commandTests:
-  - name: "git version"
-    command: "git"
+  - name: "wal-g is installed"
+    command: "wal-g"
     args: ["--version"]
     exitCode: 0
+fileExistenceTests:
+  - name: "backup.sh"
+    path: /wal-g/backup.sh
+  - name: "recover.sh"
+    path: /wal-g/recover.sh
+  - name: "post-recovery.sh"
+    path: /wal-g/post-recovery.sh
+  - name: "pg-hba.conf"
+    path: /wal-g/pg-hba.conf
+  - name: "recovery.conf"
+    path: /wal-g/recovery.conf

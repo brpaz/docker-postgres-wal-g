@@ -1,20 +1,13 @@
-# Docker image template
+# Postgres Wal-G Docker
 
-> A template repository for a Docker image.
+> Postgres Docker container with [WAL-G](https://github.com/wal-g/wal-g) support.
 
-## About
+## Usage
 
-TODO
+```sh
+docker pull ghcr.io/brpaz/docker-postgres-wal-g:latest
+```
 
-## Demo
-
-
-## 🚀 Getting started
-
-
-## 🤝 Contributing
-
-Check [CONTRIBUTING.md](CONTRIBUTING.md) files for details.
 
 ## 🫶 Support
 
@@ -26,6 +19,8 @@ If you find this project helpful and would like to support its development, ther
 
 ## ❤️ Acknowledgements
 
+This project is heavily inspired by [this](https://git.koehn.com/docker/postgres-wal-g) project.
+
 ## 📃 License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) file for details.
@@ -34,4 +29,4 @@ Distributed under the MIT License. See [LICENSE](LICENSE) file for details.
 
 **Bruno Paz** - [https://brunopaz.dev](https://brunopaz.dev) - oss@brunopaz.dev
 
-**Project Link**: replace me
+**Project Link**: https://github.com/brpaz/docker-postgres-wal-g

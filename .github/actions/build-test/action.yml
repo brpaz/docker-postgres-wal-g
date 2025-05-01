@@ -1,0 +1,52 @@
+name: Build and Test
+description: Build Docker image and run structure tests
+
+inputs:
+  postgres_version:
+    description: "PostgreSQL version to use in the image"
+    required: true
+    default: "latest"
+  wal_g_version:
+    required: true
+    description: "wal-g version to use in the image"
+    default: "latest"
+  image_tag:
+    required: true
+    description: "Image tag to use for the built image"
+
+outputs:
+  tags:
+    description: "Image tags"
+    value: ${{ steps.meta.outputs.tags }}
+runs:
+  using: "composite"
+  steps:
+    - uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: Dockerfile
+
+    - uses: docker/setup-qemu-action@v3
+
+    - uses: docker/setup-buildx-action@v3
+
+    - uses: docker/metadata-action@v5
+      id: meta
+      with:
+        images: |
+          ${{ inputs.image_tag }}
+
+    - uses: docker/build-push-action@v5
+      with:
+        context: .
+        tags: ${{ inputs.image_tag }}
+        labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+          POSTGRES_VERSION=${{ inputs.postgres_version }}
+          WAL_G_VERSION=${{ inputs.wal_g_version }}
+        push: false
+        load: true
+
+    - uses: brpaz/structure-tests-action@1.3.0
+      with:
+        image: ${{ inputs.image_tag }}
+        configFile: structure-tests.yaml

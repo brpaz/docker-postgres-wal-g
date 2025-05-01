@@ -3,12 +3,19 @@
 version: "3"
 
 vars:
-  IMAGE_NAME: "docker-image-template"
-  IMAGE_TAG: "local-dev"
+  # Default values that can be overridden by .env file
+  IMAGE_NAME: '{{default "postgres-wal-g" .IMAGE_NAME}}'
+  IMAGE_TAG: '{{default "local-dev" .IMAGE_TAG}}'
   IMAGE_FULL_NAME: "{{.IMAGE_NAME}}:{{.IMAGE_TAG}}"
+  POSTGRES_VERSION: '{{default "17.4" .POSTGRES_VERSION}}'
+  WAL_G_VERSION: '{{default "v.3.0.7" .WAL_G_VERSION}}'
+  TEST_POSTGRES_PORT: '{{default "5432" .TEST_POSTGRES_PORT}}'
 
 env:
   DOCKER_BUILDKIT: "1"
+  # Import environment variables from .env file if it exists
+
+dotenv: [".env"]
 
 tasks:
   default:
@@ -19,22 +26,17 @@ tasks:
     desc: "Build the Docker image"
     cmds:
       - |
-        BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-        REVISION=$(git rev-parse --short HEAD 2>/dev/null || echo "dev")
-        VERSION=$(git describe --tags --always --dirty 2> /dev/null || echo "dev")
-
         docker buildx build \
-          --build-arg BUILD_DATE=$BUILD_DATE \
-          --build-arg REVISION=$REVISION \
-          --build-arg VERSION=$VERSION \
           -t {{ .IMAGE_FULL_NAME }} \
+          --build-arg POSTGRES_VERSION={{ .POSTGRES_VERSION }} \
+          --build-arg WAL_G_VERSION={{ .WAL_G_VERSION }} \
           --load \
           .
 
   lint:
     desc: "Run linter"
     cmds:
-      - docker run --rm -v $(pwd):/app -w /app hadolint/hadolint:v2.12.0 hadolint Dockerfile
+      - hadolint Dockerfile
 
   test:
     desc: "Run container structure tests"
@@ -43,28 +45,11 @@ tasks:
     cmds:
       - container-structure-test test --image {{.IMAGE_NAME}}:{{.IMAGE_TAG}} --config structure-tests.yaml
 
-  security:
-    desc: "Run container security tests"
-    deps:
-      - build
-    vars:
-      TRIVY_REPORT_PATH: ".trivy/report.html"
+  run:
+    desc: "Run the Docker container"
     cmds:
       - |
-        docker run \
-          -v /var/run/docker.sock:/var/run/docker.sock \
-          -v $(pwd)/.trivy/cache:/root/.cache/ \
-          -v $(pwd):/app \
-          aquasec/trivy:0.50.1 \
-          image \
-            --config /app/trivy.yaml \
-            --format template --template "@contrib/html.tpl" \
-            -o /app/{{ .TRIVY_REPORT_PATH }} \
-          {{.IMAGE_FULL_NAME}}
-
-        # Open report file
-        if [[ $(uname) == "Linux" ]]; then
-          xdg-open {{ .TRIVY_REPORT_PATH }}
-        elif [[ $(uname) == "Darwin" ]]; then
-          open {{ .TRIVY_REPORT_PATH }}
-        fi
+        docker run -d --rm -it \
+          -e POSTGRES_PASSWORD=postgres \
+          -p {{.TEST_POSTGRES_PORT}}:5432 \
+          {{ .IMAGE_FULL_NAME }}
