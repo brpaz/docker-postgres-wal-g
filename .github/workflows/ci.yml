@@ -7,6 +7,13 @@ on:
   pull_request:
     branches:
       - "main"
+    paths:
+      - "Dockerfile"
+      - ".github/workflows/ci.yml"
+      - ".github/actions/**"
+      - "wal-g/**"
+  workflow_dispatch:
+
 env:
   CONTAINER_STRUCTURE_TESTS_VERSION: "1.19.3"
 
@@ -15,16 +22,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # TODO maybe generate matrix based on input on workflow_dispatch
   test:
-    name: Test ${{ matrix.postgres_version }}-wal-g-${{ matrix.wal_g_version }}
+    name: Test with Postgres ${{ matrix.postgres_version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - postgres_version: "17"
-            wal_g_version: "v3.0.7"
-          - postgres_version: "16"
-            wal_g_version: "v3.0.7"
+        postgres_version: ["17", "16"]
+        wal_g_version: ["v3.0.7"]
+      fail-fast: true
     env:
       TEST_IMAGE_TAG: "ghcr.io/brpaz/postgres-wal-g:${{ matrix.postgres_version }}-${{ github.sha }}"
     steps:
@@ -42,3 +48,12 @@ jobs:
           postgres_version: ${{ matrix.postgres_version }}
           wal_g_version: ${{ matrix.wal_g_version }}
           image_tag: ${{ env.TEST_IMAGE_TAG }}
+
+      - name: Push Docker image
+        uses: docker/build-push-action@v5
+        if: github.event_name != 'pull_request'
+        with:
+          context: .
+          tags: ${{ env.TEST_IMAGE_TAG }}
+          push: true
+          load: false
