@@ -1,0 +1,18 @@
+#  Refer for explanation to following link:
+#  https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
+#
+
+pre-commit:
+  parallel: true
+  commands:
+    lint-dockerfile:
+      glob: "Dockerfile"
+      run: task lint
+    test:
+      run: task test
+      glob: Dockerfile
+
+commit-msg:
+  scripts:
+    "commitlint.sh":
+      runner: bash
