@@ -59,6 +59,13 @@ jobs:
           wal_g_version: ${{ matrix.wal_g_version }}
           image_tag: ${{ env.RELEASE_IMAGE_TAG }}
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Push Docker image
         uses: docker/build-push-action@v5
         if: github.event_name != 'pull_request'
