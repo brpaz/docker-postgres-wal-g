@@ -16,7 +16,7 @@ on:
 
 env:
   CONTAINER_STRUCTURE_TESTS_VERSION: "1.19.3"
-  IMAGE_NAME: "ghcr.io/brpaz/docker-postgres-wal-g:postgres-wal-g"
+  IMAGE_NAME: "ghcr.io/brpaz/docker-postgres-wal-g"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -45,9 +45,6 @@ jobs:
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
           POSTGRES_VERSION: ${{ matrix.postgres_version }}
           BUILD_NUMBER: ${{ github.run_number }}
-
-      - run: |
-          echo "Release image tag: ${{ env.RELEASE_IMAGE_TAG }}"
 
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
