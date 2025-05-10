@@ -35,7 +35,7 @@ runs:
         images: |
           ${{ inputs.image_tag }}
 
-    - uses: docker/build-push-action@v5
+    - uses: docker/build-push-action@v6
       with:
         context: .
         tags: ${{ inputs.image_tag }}
