@@ -46,7 +46,7 @@ runs:
         push: false
         load: true
 
-    - uses: brpaz/structure-tests-action@1.3.0
+    - uses: brpaz/structure-tests-action@1.4.0
       with:
         image: ${{ inputs.image_tag }}
         configFile: structure-tests.yaml
